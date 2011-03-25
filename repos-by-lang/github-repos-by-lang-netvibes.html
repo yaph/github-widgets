@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:widget="http://www.netvibes.com/ns/">
+  <head>
+    <meta name="author" content="Ramiro Gómez" />
+    <meta name="description" content="Display your Github repositories grouped by language." />
+    <meta name="apiVersion" content="1.0" />
+    <meta name="autoRefresh" content="60" />
+    <meta name="debugMode" content="true" />
+    <link rel="stylesheet" type="text/css" href="http://www.netvibes.com/themes/uwa/style.css" />
+    <script type="text/javascript" src="http://www.netvibes.com/js/UWA/load.js.php?env=Standalone"></script>
+    <title>My Github Repos</title>
+    <link rel="icon" type="image/png" href="https://github.com/fluidicon.png" />
+
+    <!-- UWA preferences -->
+    <widget:preferences>
+      <preference name="user" type="text" label="Github user name" defaultValue="yaph" />
+    </widget:preferences>
+
+    <style type="text/css">
+     #loading{height:50px;text-align:center;margin:30px;}
+    </style>
+
+    <script type="text/javascript">
+    String.prototype.escapeHTML = function() {
+        return(
+        this.replace(/&/g,'&amp;')
+            .replace(/\>/g,'&gt;')
+            .replace(/\</g,'&lt;')
+            .replace(/\"/g,'&quot;')
+            .replace(/\'/g,'&#039;')
+        );
+    };
+    var GR = {
+        serviceUserRepos: 'http://github.com/api/v2/json/repos/show/',
+        target: function() {
+            return document.getElementById('github-repos-by-lang');
+        },
+        showUserRepos: function(user) {
+            var url = GR.serviceUserRepos + user;
+            UWA.Data.getJson(GR.serviceUserRepos + user, function(json) {
+                var repoLi = '';
+                var reposByLang = {};
+                var langCounts  = [];
+                repos = json.repositories;
+                // populate reposByLang object
+                for (i in repos) {
+                    var r = repos[i];
+                    if ("undefined" != typeof r.language) {
+                        var lang = r.language;
+                        if ("undefined" == typeof reposByLang[lang])
+                            reposByLang[lang] = [];
+                        reposByLang[lang].push(r);
+                    }
+                }
+                // populatelangCounts array
+                for (l in reposByLang) {
+                    langCounts.push({lang: l, count: reposByLang[l].length});
+                }
+                langCounts.sort(function(a, b) {
+                    return (a.count < b.count) ? 1 : -1;
+                });
+                // markup repo list
+                repoLi = '<ul>';
+                for (i in langCounts) {
+                    var lang = langCounts[i].lang;
+                    if ("undefined" == typeof lang) continue;
+                    var count = langCounts[i].count;
+                    var rbls = reposByLang[lang];
+                    repoLi += '<li>' + lang.escapeHTML() + ' (' + count + ')<ul>';
+                    for (i in rbls) {
+                        r = rbls[i];
+                        if ("undefined" != typeof r.url && "undefined" != typeof r.name) {
+                            var desc = r.name;
+                            if ("undefined" != typeof r.description && r.description)
+                                desc = r.description;
+                            repoLi += '<li><a href="' + r.url.escapeHTML() 
+                                + '" title="' + desc.escapeHTML() + '">'
+                                + r.name.escapeHTML() + '</a></li>';
+                        }
+                    }
+                    repoLi += '</ul></li>';
+                }
+                repoLi += '</ul>';
+                GR.target().innerHTML = repoLi;
+            });
+        },
+    };
+    widget.onLoad = function() {
+        var user = widget.getValue('user');
+        if (user) {
+            GR.showUserRepos(user);
+        } else {
+            GR.target().innerHTML = 'You must enter a user name in the Widget settings!';
+        }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="github-repos-by-lang"></div>
+  </body>
+</html>
