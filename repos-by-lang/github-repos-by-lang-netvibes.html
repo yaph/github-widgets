@@ -67,6 +67,10 @@
                     if ("undefined" == typeof lang) continue;
                     var count = langCounts[i].count;
                     var rbls = reposByLang[lang];
+                    // sort by last push time
+                    rbls.sort(function(a, b) {
+                        return (a.pushed_at < b.pushed_at) ? 1 : -1;
+                    });
                     repoLi += '<li>' + lang.escapeHTML() + ' (' + count + ')<ul>';
                     for (i in rbls) {
                         r = rbls[i];
