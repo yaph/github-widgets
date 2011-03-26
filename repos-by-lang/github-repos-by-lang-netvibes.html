@@ -4,7 +4,12 @@
   <head>
     <meta name="author" content="Ramiro Gómez" />
     <meta name="description" content="Display your Github repositories grouped by language." />
-    <meta name="apiVersion" content="1.0" />
+    <meta name="email" content="widgets@ramiro.org" />
+    <meta name="screenshot" content="https://lh6.googleusercontent.com/2hBs0-WXvJdPs6lfwbMIOhl6aSJaHa1cLxvC_kYjFpc8Pc6gdq1A3SWsBRgaojENDcX3uIPay77CJIqKek32KfwEbg=s512" />
+    <meta name="thumbnail" content="https://lh5.googleusercontent.com/OnpS3SIdOVsTRtSfSvXLMDOFByweYGa2EbbpoJp6dfRYBKqcVmtO2Tznvjrk7xBHlIRRSgV0CzUYU6IW4AuXPCc7gw=s512" />
+    <meta name="keywords" content="programming, developer, repositories, git, coder, github" />
+    <meta name="version" content="1.1" />
+    <meta name="apiVersion" content="1.2" />
     <meta name="autoRefresh" content="60" />
     <meta name="debugMode" content="true" />
     <link rel="stylesheet" type="text/css" href="http://www.netvibes.com/themes/uwa/style.css" />
@@ -15,10 +20,13 @@
     <!-- UWA preferences -->
     <widget:preferences>
       <preference name="user" type="text" label="Github user name" defaultValue="yaph" />
+      <preference name="hide_repos" type="boolean" label="Hide repos and show after click on language" defaultValue="false" />
     </widget:preferences>
 
     <style type="text/css">
-     #loading{height:50px;text-align:center;margin:30px;}
+     .hide_elt{display:none;}
+     .show_elt{display:block;}
+     .github-repos-lang{cursor:pointer;}
     </style>
 
     <script type="text/javascript">
@@ -36,10 +44,10 @@
         target: function() {
             return document.getElementById('github-repos-by-lang');
         },
-        showUserRepos: function(user) {
+        showUserRepos: function(user, hide_repos) {
             var url = GR.serviceUserRepos + user;
             UWA.Data.getJson(GR.serviceUserRepos + user, function(json) {
-                var repoLi = '';
+                var HTML = '';
                 var reposByLang = {};
                 var langCounts  = [];
                 repos = json.repositories;
@@ -61,7 +69,7 @@
                     return (a.count < b.count) ? 1 : -1;
                 });
                 // markup repo list
-                repoLi = '<ul>';
+                HTML = '<ul>';
                 for (i in langCounts) {
                     var lang = langCounts[i].lang;
                     if ("undefined" == typeof lang) continue;
@@ -71,29 +79,37 @@
                     rbls.sort(function(a, b) {
                         return (a.pushed_at < b.pushed_at) ? 1 : -1;
                     });
-                    repoLi += '<li>' + lang.escapeHTML() + ' (' + count + ')<ul>';
+                    HTML += '<li class="github-repos-lang" onclick="GR.toogleRepos(this);" title="click to show or hide repos">';
+                    HTML += lang.escapeHTML() + ' (' + count + ')';
+                    HTML += (hide_repos) ? '<ul class="hide_elt">' : '<ul>';
                     for (i in rbls) {
                         r = rbls[i];
                         if ("undefined" != typeof r.url && "undefined" != typeof r.name) {
                             var desc = r.name;
                             if ("undefined" != typeof r.description && r.description)
                                 desc = r.description;
-                            repoLi += '<li><a href="' + r.url.escapeHTML() 
+                            HTML += '<li><a href="' + r.url.escapeHTML() 
                                 + '" title="' + desc.escapeHTML() + '">'
                                 + r.name.escapeHTML() + '</a></li>';
                         }
                     }
-                    repoLi += '</ul></li>';
+                    HTML += '</ul></li>';
                 }
-                repoLi += '</ul>';
-                GR.target().innerHTML = repoLi;
+                HTML += '</ul>';
+                GR.target().innerHTML = HTML;
             });
         },
+        toogleRepos: function(elt) {
+            var target = elt.childNodes[1];
+            target.className =  ("hide_elt" == target.className) ? "show_elt" : "hide_elt";
+        }
     };
     widget.onLoad = function() {
         var user = widget.getValue('user');
         if (user) {
-            GR.showUserRepos(user);
+            // netvibes type boolean value is of type string
+            var hide_repos = ("false" === widget.getValue('hide_repos') ? false : true);
+            GR.showUserRepos(user, hide_repos);
         } else {
             GR.target().innerHTML = 'You must enter a user name in the Widget settings!';
         }
