@@ -79,7 +79,7 @@
                     rbls.sort(function(a, b) {
                         return (a.pushed_at < b.pushed_at) ? 1 : -1;
                     });
-                    HTML += '<li class="github-repos-lang" onclick="GR.toogleRepos(this);" title="click to show or hide repos">';
+                    HTML += '<li class="github-repos-lang" onclick="toogleRepos(this);" title="click to show or hide repos">';
                     HTML += lang.escapeHTML() + ' (' + count + ')';
                     HTML += (hide_repos) ? '<ul class="hide_elt">' : '<ul>';
                     for (i in rbls) {
@@ -98,10 +98,6 @@
                 HTML += '</ul>';
                 GR.target().innerHTML = HTML;
             });
-        },
-        toogleRepos: function(elt) {
-            var target = elt.childNodes[1];
-            target.className =  ("hide_elt" == target.className) ? "show_elt" : "hide_elt";
         }
     };
     widget.onLoad = function() {
@@ -113,6 +109,10 @@
         } else {
             GR.target().innerHTML = 'You must enter a user name in the Widget settings!';
         }
+    }
+    function toogleRepos(elt) {
+        var target = elt.childNodes[1];
+        target.className =  ("hide_elt" == target.className) ? "show_elt" : "hide_elt";
     }
     </script>
   </head>
