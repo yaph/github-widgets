@@ -30,6 +30,10 @@
     </style>
 
     <script type="text/javascript">
+    function toogleRepos(elt) {
+        var target = elt.childNodes[1];
+        target.className =  ("hide_elt" == target.className) ? "show_elt" : "hide_elt";
+    }
     String.prototype.escapeHTML = function() {
         return(
         this.replace(/&/g,'&amp;')
@@ -109,10 +113,6 @@
         } else {
             GR.target().innerHTML = 'You must enter a user name in the Widget settings!';
         }
-    }
-    function toogleRepos(elt) {
-        var target = elt.childNodes[1];
-        target.className =  ("hide_elt" == target.className) ? "show_elt" : "hide_elt";
     }
     </script>
   </head>
