@@ -8,7 +8,7 @@
     <meta name="screenshot" content="https://lh6.googleusercontent.com/2hBs0-WXvJdPs6lfwbMIOhl6aSJaHa1cLxvC_kYjFpc8Pc6gdq1A3SWsBRgaojENDcX3uIPay77CJIqKek32KfwEbg=s512" />
     <meta name="thumbnail" content="https://lh5.googleusercontent.com/OnpS3SIdOVsTRtSfSvXLMDOFByweYGa2EbbpoJp6dfRYBKqcVmtO2Tznvjrk7xBHlIRRSgV0CzUYU6IW4AuXPCc7gw=s512" />
     <meta name="keywords" content="programming, developer, repositories, git, coder, github" />
-    <meta name="version" content="1.4" />
+    <meta name="version" content="1.5" />
     <meta name="apiVersion" content="1.2" />
     <meta name="autoRefresh" content="60" />
     <meta name="debugMode" content="true" />
@@ -24,16 +24,10 @@
     </widget:preferences>
 
     <style type="text/css">
-     .hide_elt{display:none;}
-     .show_elt{display:block;}
      .github-repos-lang{cursor:pointer;}
     </style>
 
     <script type="text/javascript">
-    function toogleRepos(elt) {
-        var target = elt.childNodes[1];
-        target.className =  ("hide_elt" == target.className) ? "show_elt" : "hide_elt";
-    }
     String.prototype.escapeHTML = function() {
         return(
         this.replace(/&/g,'&amp;')
@@ -45,6 +39,7 @@
     };
     var GR = {
         serviceUserRepos: 'http://github.com/api/v2/json/repos/show/',
+        repoCount: 0,
         target: function() {
             return document.getElementById('github-repos-by-lang');
         },
@@ -58,6 +53,7 @@
                 // populate reposByLang object
                 for (i in repos) {
                     var r = repos[i];
+                    GR.repoCount++;
                     if ("undefined" != typeof r.language) {
                         var lang = r.language;
                         if ("undefined" == typeof reposByLang[lang])
@@ -65,6 +61,8 @@
                         reposByLang[lang].push(r);
                     }
                 }
+                if (0 == GR.repoCount)
+                    return;
                 // populatelangCounts array
                 for (l in reposByLang) {
                     langCounts.push({lang: l, count: reposByLang[l].length});
@@ -85,7 +83,7 @@
                     });
                     HTML += '<li class="github-repos-lang" onclick="toogleRepos(this);" title="click to show or hide repos">';
                     HTML += lang.escapeHTML() + ' (' + count + ')';
-                    HTML += (hide_repos) ? '<ul class="hide_elt">' : '<ul>';
+                    HTML += (hide_repos) ? '<ul style="display:none;">' : '<ul>';
                     for (i in rbls) {
                         r = rbls[i];
                         if ("undefined" != typeof r.url && "undefined" != typeof r.name) {
@@ -101,6 +99,20 @@
                 }
                 HTML += '</ul>';
                 GR.target().innerHTML = HTML;
+                // display of repos when clicking on language
+                var langs = widget.body.getElementsByClassName("github-repos-lang");
+                for (i in langs) {
+                    var l = langs[i];
+                    if ("undefined" != typeof l.childNodes) {
+                        l.onclick = function(e) {
+                            var target = e.target.childNodes[1];
+                            if (target.offsetWidth > 0 || target.offsetHeight > 0)
+                                target.style.display = 'none';
+                            else
+                                target.style.display = 'block';
+                        }
+                    }
+                }
             });
         }
     };
@@ -108,7 +120,9 @@
         var user = widget.getValue('user');
         if (user) {
             // netvibes type boolean value is of type string
-            var hide_repos = ("false" === widget.getValue('hide_repos') ? false : true);
+            var hide_val = widget.getValue('hide_repos');
+            // known Bug in getValue behaviour, see http://dev.netvibes.com/doc/uwa/faq
+            var hide_repos = ("false" === hide_val || false === hide_val) ? false : true;
             GR.showUserRepos(user, hide_repos);
         } else {
             GR.target().innerHTML = 'You must enter a user name in the Widget settings!';
