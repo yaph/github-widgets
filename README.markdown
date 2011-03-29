@@ -8,4 +8,4 @@ This widget shows the public repositories of the entered user grouped by languag
 
 ### TODOs
 
-- Add setting for widget title
+- Check whether GR.showUserRepos(user, widget.getBool('hide_repos') works with the Google Gadget

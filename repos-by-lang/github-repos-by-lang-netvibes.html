@@ -21,6 +21,7 @@
     <widget:preferences>
       <preference name="user" type="text" label="Github user name" defaultValue="yaph" />
       <preference name="hide_repos" type="boolean" label="Hide repos and show after click on language" defaultValue="false" />
+      <preference name="title" type="text" label="Title of the widget" />
     </widget:preferences>
 
     <style type="text/css">
@@ -119,11 +120,10 @@
     widget.onLoad = function() {
         var user = widget.getValue('user');
         if (user) {
-            // netvibes type boolean value is of type string
-            var hide_val = widget.getValue('hide_repos');
-            // known Bug in getValue behaviour, see http://dev.netvibes.com/doc/uwa/faq
-            var hide_repos = ("false" === hide_val || false === hide_val) ? false : true;
-            GR.showUserRepos(user, hide_repos);
+            GR.showUserRepos(user, widget.getBool('hide_repos'));
+            if (title = widget.getValue('title')) {
+                widget.setTitle(title);
+            }
         } else {
             GR.target().innerHTML = 'You must enter a user name in the Widget settings!';
         }
