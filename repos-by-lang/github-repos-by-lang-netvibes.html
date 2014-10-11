@@ -39,27 +39,25 @@
         );
     };
     var GR = {
-        serviceUserRepos: 'http://github.com/api/v2/json/repos/show/',
+        serviceUserRepos: 'https://api.github.com/users/USERNAME/repos?type=owner',
         repoCount: 0,
         target: function() {
             return document.getElementById('github-repos-by-lang');
         },
         showUserRepos: function(user, hide_repos) {
-            var url = GR.serviceUserRepos + user;
-            UWA.Data.getJson(GR.serviceUserRepos + user, function(json) {
+            var url = GR.serviceUserRepos.replace('USERNAME', user);
+            UWA.Data.getJson(url, function(json) {
                 var HTML = '';
                 var reposByLang = {};
                 var langCounts  = [];
-                repos = json.repositories;
                 // populate reposByLang object
-                for (i in repos) {
-                    var r = repos[i];
+                for (i in json) {
+                    var r = json[i];
                     GR.repoCount++;
-                    if ("undefined" != typeof r.language) {
-                        var lang = r.language;
-                        if ("undefined" == typeof reposByLang[lang])
-                            reposByLang[lang] = [];
-                        reposByLang[lang].push(r);
+                    if ("undefined" != typeof r.language && r.language) {
+                        if ("undefined" == typeof reposByLang[r.language])
+                            reposByLang[r.language] = [];
+                        reposByLang[r.language].push(r);
                     }
                 }
                 if (0 == GR.repoCount)
@@ -91,7 +89,7 @@
                             var desc = r.name;
                             if ("undefined" != typeof r.description && r.description)
                                 desc = r.description;
-                            HTML += '<li><a href="' + r.url.escapeHTML() 
+                            HTML += '<li><a href="' + r.url.escapeHTML()
                                 + '" title="' + desc.escapeHTML() + '" target="_top">'
                                 + r.name.escapeHTML() + '</a></li>';
                         }
