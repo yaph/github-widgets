@@ -85,11 +85,11 @@
                     HTML += (hide_repos) ? '<ul style="display:none;">' : '<ul>';
                     for (i in rbls) {
                         r = rbls[i];
-                        if ("undefined" != typeof r.url && "undefined" != typeof r.name) {
+                        if ("undefined" != typeof r.html_url && "undefined" != typeof r.name) {
                             var desc = r.name;
                             if ("undefined" != typeof r.description && r.description)
                                 desc = r.description;
-                            HTML += '<li><a href="' + r.url.escapeHTML()
+                            HTML += '<li><a href="' + r.html_url.escapeHTML()
                                 + '" title="' + desc.escapeHTML() + '" target="_top">'
                                 + r.name.escapeHTML() + '</a></li>';
                         }
